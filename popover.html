@@ -36,28 +36,23 @@
     </div>
   </section>
 
-  <section class="controls">
-    <div class="row">
-      <label for="ability">Ability score</label>
-      <div class="stepper">
-        <button type="button" data-step="ability" data-delta="-1" aria-label="Decrease ability score">−</button>
-        <input id="ability" type="number" value="0" inputmode="numeric">
-        <button type="button" data-step="ability" data-delta="1" aria-label="Increase ability score">+</button>
-      </div>
+  <section class="abilities" aria-labelledby="abTitle">
+    <h2 id="abTitle">Ability score</h2>
+    <div class="grid-head"><span>Roll</span><span></span><span>Score</span><span>Dmg ×</span></div>
+    <div id="abilityRows" role="radiogroup" aria-label="Ability to roll with"></div>
+    <div class="row rank-row">
+      <label for="charRank">Rank</label>
+      <input id="charRank" type="number" min="1" value="1" inputmode="numeric" class="narrow">
+      <button type="button" id="rankToMult" class="small" title="Set every multiplier to the rank">Multipliers = rank</button>
     </div>
+  </section>
+
+  <section class="controls">
 
 
 
     <fieldset class="damage">
       <legend>Damage (attacks)</legend>
-      <div class="row">
-        <label for="mult">Damage multiplier</label>
-        <div class="stepper">
-          <button type="button" data-step="mult" data-delta="-1" aria-label="Decrease multiplier">−</button>
-          <input id="mult" type="number" min="0" value="1" inputmode="numeric">
-          <button type="button" data-step="mult" data-delta="1" aria-label="Increase multiplier">+</button>
-        </div>
-      </div>
       <div class="row">
         <label for="dr">Target damage reduction</label>
         <div class="stepper">
@@ -93,6 +88,33 @@
     </div>
 
   </section>
+
+  <details class="sheet" id="sheet">
+    <summary>Character name, save &amp; import</summary>
+    <div class="sheet-body">
+      <div class="row">
+        <label for="charName">Name</label>
+        <input id="charName" type="text" maxlength="40" placeholder="Character name">
+      </div>
+      <div class="row">
+        <select id="saved" aria-label="Saved characters"></select>
+        <button type="button" id="loadChar" class="small">Load</button>
+        <button type="button" id="saveChar" class="small">Save</button>
+        <button type="button" id="delChar" class="small">Delete</button>
+      </div>
+
+      <details class="io">
+        <summary>Import / export JSON</summary>
+        <textarea id="json" rows="6" spellcheck="false" placeholder='{"name":"…","rank":3,"abilities":{"melee":{"score":0,"multiplier":3}, …}}'></textarea>
+        <div class="row">
+          <button type="button" id="exportChar" class="small">Export</button>
+          <button type="button" id="importChar" class="small">Import</button>
+          <label class="small file">Open file…<input type="file" id="file" accept=".json,application/json" hidden></label>
+        </div>
+        <div class="msg" id="ioMsg" role="status"></div>
+      </details>
+    </div>
+  </details>
 
   <section class="log">
     <header><h2>Table log</h2><button type="button" id="clear" class="link">Clear</button></header>

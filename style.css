@@ -148,3 +148,60 @@ button.die.marvel.fantastic:disabled { color: #3a1200; }
 .rr button[data-kind="trouble"]:hover:not(:disabled) { border-color: #ff7b7b; color: #ff7b7b; }
 .rr button:disabled { opacity: .35; cursor: not-allowed; }
 .dice { gap: 10px; align-items: start; }
+
+/* ability chips */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip {
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--edge); border-radius: 6px;
+  padding: 5px 4px; cursor: pointer; display: grid; gap: 1px; text-align: center;
+}
+.chip:hover { border-color: var(--muted); }
+.chip.on { border-color: var(--red); background: #3a1a1f; }
+.chip-name { font-weight: 700; font-size: 12px; }
+.chip-score { color: var(--muted); font-size: 12px; white-space: pre; }
+.chip.on .chip-score { color: var(--text); }
+
+/* character sheet */
+.sheet { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 10px; }
+.sheet > summary, .io > summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.sheet-body { display: grid; gap: 8px; margin-top: 8px; }
+.sheet .row label { flex: none; }
+.narrow { width: 64px; text-align: center; }
+.grid-head, .grid-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 6px; align-items: center; }
+.grid-head { color: var(--muted); font-size: 11px; text-align: center; }
+.grid-row { margin-bottom: 4px; }
+.grid-row label { color: var(--text); }
+.grid-row input { width: 100%; text-align: center; }
+#sheetRows { display: block; }
+select {
+  flex: 1; min-width: 0; background: var(--bg); color: var(--text);
+  border: 1px solid var(--edge); border-radius: 6px; padding: 6px; font: inherit;
+}
+button.small, label.small {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--edge); border-radius: 6px;
+  padding: 5px 8px; font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+button.small:hover, label.small:hover { border-color: var(--muted); }
+.io { display: grid; gap: 6px; }
+.io textarea {
+  width: 100%; background: var(--bg); color: var(--text);
+  border: 1px solid var(--edge); border-radius: 6px; padding: 6px;
+  font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; margin-top: 6px; resize: vertical;
+}
+.msg { font-size: 12px; color: var(--green); min-height: 1.2em; }
+.msg.bad { color: #ff7b7b; }
+
+/* Ability score section (M.A.R.V.E.L) */
+.abilities { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 10px; display: grid; gap: 6px; }
+.abilities h2 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+.abilities .grid-head, .abilities .grid-row { grid-template-columns: 34px 1fr 64px 64px; }
+.abilities .grid-row { margin: 0; padding: 3px 4px; border-radius: 6px; border: 1px solid transparent; }
+.abilities .grid-row.on { border-color: var(--red); background: #3a1a1f; }
+.abilities .grid-row input[type="radio"] { width: 18px; height: 18px; margin: 0 auto; accent-color: var(--red); cursor: pointer; }
+.ab-name { display: flex; align-items: baseline; gap: 8px; cursor: pointer; }
+.ab-name strong { font: 900 18px/1 "Arial Black", Impact, system-ui, sans-serif; color: var(--red); width: 14px; }
+.ab-name span { color: var(--muted); font-size: 12px; }
+.grid-row.on .ab-name span { color: var(--text); }
+.rank-row { margin-top: 2px; }
