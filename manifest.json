@@ -1,0 +1,16 @@
+{
+  "name": "Marvel Multiverse Dice (d616)",
+  "version": "1.0.0",
+  "manifest_version": 1,
+  "author": "You",
+  "description": "d616 dice roller for the Marvel Multiverse RPG: Marvel die, Fantastic results, Edge and Trouble, shared with the whole table.",
+  "icon": "/icon.svg",
+  "action": {
+    "title": "d616 Roller",
+    "icon": "/icon.svg",
+    "popover": "/popover.html",
+    "width": 340,
+    "height": 620
+  },
+  "background_url": "/background.html"
+}
