@@ -10,12 +10,17 @@
 <main>
   <section class="stage" aria-live="polite">
     <div class="dice" id="dice">
-      <div class="die" data-die="a">–</div>
-      <div class="die marvel" data-die="m">–</div>
-      <div class="die" data-die="b">–</div>
+      <button type="button" class="die" data-die="a" disabled aria-label="Die 1">–</button>
+      <button type="button" class="die marvel" data-die="m" disabled aria-label="Marvel die">–</button>
+      <button type="button" class="die" data-die="b" disabled aria-label="Die 2">–</button>
+    </div>
+    <div class="prompt" id="prompt" hidden>
+      <span id="promptText"></span>
+      <button type="button" id="keep" class="link" hidden>Keep this roll</button>
     </div>
     <div class="total" id="total">Roll to begin</div>
     <div class="outcome" id="outcome"></div>
+    <div class="damage-out" id="damage" hidden></div>
     <div class="detail" id="detail"></div>
   </section>
 
@@ -63,13 +68,37 @@
       </div>
     </div>
 
+    <fieldset class="damage">
+      <legend>Damage (attacks)</legend>
+      <div class="row">
+        <label for="mult">Damage multiplier</label>
+        <div class="stepper">
+          <button type="button" data-step="mult" data-delta="-1" aria-label="Decrease multiplier">−</button>
+          <input id="mult" type="number" min="0" value="1" inputmode="numeric">
+          <button type="button" data-step="mult" data-delta="1" aria-label="Increase multiplier">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <label for="dr">Target damage reduction</label>
+        <div class="stepper">
+          <button type="button" data-step="dr" data-delta="-1" aria-label="Decrease damage reduction">−</button>
+          <input id="dr" type="number" min="0" value="0" inputmode="numeric">
+          <button type="button" data-step="dr" data-delta="1" aria-label="Increase damage reduction">+</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="dbl" checked> Fantastic success doubles damage</label>
+    </fieldset>
+
     <div class="row">
       <label for="label">Roll for</label>
       <input id="label" type="text" maxlength="40" placeholder="Attack, Resilience…">
     </div>
     <label class="check"><input type="checkbox" id="private"> Private roll (only I see it)</label>
 
-    <button type="button" id="roll" class="roll-btn">Roll d616</button>
+    <div class="btns">
+      <button type="button" id="roll" class="roll-btn alt">Roll d616</button>
+      <button type="button" id="attack" class="roll-btn">Attack + damage</button>
+    </div>
   </section>
 
   <section class="log">

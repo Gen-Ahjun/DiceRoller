@@ -1,25 +1,29 @@
 import { OBR, CHANNEL, addToLog, loadLog, clearLog } from "./shared.js";
-import { rollD616, notation, summary } from "./dice.js";
+import { startRoll, rerollDie, keepRoll, notation, summary, damageText } from "./dice.js";
 
 const $ = (id) => document.getElementById(id);
 const settingsKey = "mm-dice-settings";
+const SAVED = ["ability", "tn", "mult", "dr"];
 let me = { id: "local", name: "Player" };
+let cur = null; // the roll on screen: { id, label, private, roll }
 
-// ---- settings (ability score etc. persist between sessions) ----
+// ---- settings (persist between sessions) ----
 function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem(settingsKey) || "{}");
-    if (s.ability !== undefined) $("ability").value = s.ability;
-    if (s.tn !== undefined) $("tn").value = s.tn;
+    for (const k of SAVED) if (s[k] !== undefined) $(k).value = s[k];
+    if (s.dbl !== undefined) $("dbl").checked = s.dbl;
   } catch {}
 }
 function saveSettings() {
   try {
-    localStorage.setItem(settingsKey, JSON.stringify({ ability: $("ability").value, tn: $("tn").value }));
+    const s = Object.fromEntries(SAVED.map((k) => [k, $(k).value]));
+    s.dbl = $("dbl").checked;
+    localStorage.setItem(settingsKey, JSON.stringify(s));
   } catch {}
 }
 
-// ---- number steppers ----
+// ---- number steppers and presets ----
 document.addEventListener("click", (e) => {
   const step = e.target.closest("[data-step]");
   if (step) {
@@ -35,43 +39,68 @@ document.addEventListener("click", (e) => {
     saveSettings();
   }
 });
-$("ability").addEventListener("change", saveSettings);
-$("tn").addEventListener("change", saveSettings);
+for (const k of SAVED) $(k).addEventListener("change", saveSettings);
+$("dbl").addEventListener("change", saveSettings);
 
 // ---- rendering ----
-function faceText(die, value) {
-  return die === "m" && value === 1 ? "M" : String(value);
-}
+const faceText = (die, value) => (die === "m" && value === 1 ? "M" : String(value));
+const rerollName = (die) => (die === "m" ? "Marvel die" : "die");
 
-function renderResult(roll, animate) {
-  const r = roll.result;
+function renderRoll(animate) {
+  const r = cur.roll;
+  const pending = r.pending;
   const dice = $("dice");
+
   for (const el of dice.children) {
     const key = el.dataset.die;
     el.textContent = faceText(key, r.dice[key]);
     el.classList.toggle("fantastic", key === "m" && r.fantastic);
     el.classList.toggle("botched", r.botched);
+    el.classList.toggle("pickable", !!pending);
+    el.disabled = !pending;
   }
   if (animate) {
     dice.classList.remove("tumble");
     void dice.offsetWidth; // restart the animation
     dice.classList.add("tumble");
   }
+
+  // Prompt for edges and troubles
+  const prompt = $("prompt");
+  prompt.hidden = !pending;
+  if (pending) {
+    const left = pending.count;
+    $("promptText").textContent =
+      pending.kind === "edge"
+        ? `Edge: click the die you want to reroll (${left} left). You keep the better number.`
+        : `Trouble: click the die to reroll (${left} left). You keep the worse number.`;
+    $("keep").hidden = pending.kind !== "edge";
+  }
+
   $("total").textContent = r.total;
   const out = $("outcome");
-  out.textContent = r.outcome;
-  out.className = "outcome " + (r.ultimate ? "ultimate" : r.fantastic ? "fantastic" : r.botched ? "botched" : r.success === true ? "good" : r.success === false ? "bad" : "");
+  out.textContent = pending ? "…" : r.outcome;
+  out.className = "outcome " + (pending ? "" : r.ultimate ? "ultimate" : r.fantastic ? "fantastic" : r.botched ? "botched" : r.success === true ? "good" : r.success === false ? "bad" : "");
+
+  const dmg = $("damage");
+  if (r.damage) {
+    dmg.hidden = false;
+    dmg.textContent = damageText(r);
+    dmg.className = "damage-out" + (r.damage.amount > 0 ? " hit" : "");
+  } else {
+    dmg.hidden = true;
+  }
 
   const bits = [`${notation(r)}${r.ability ? (r.ability > 0 ? ` + ${r.ability}` : ` − ${Math.abs(r.ability)}`) : ""}`];
   if (r.tn !== null) bits.push(`TN ${r.tn}`);
   if (r.net > 0) bits.push(`${r.net} edge${r.net > 1 ? "s" : ""}`);
   if (r.net < 0) bits.push(`${-r.net} trouble${r.net < -1 ? "s" : ""}`);
   let detail = bits.join("  ·  ");
+  if (r.ignoredTrouble) detail += "\nUltimate Fantastic: trouble ignored";
   if (r.rerolls.length) {
-    const rr = r.rerolls
-      .map((x) => `${x.kind === "edge" ? "Edge" : "Trouble"}: ${x.die === "m" ? "Marvel die" : "die"} ${faceText(x.die, x.from)} → ${faceText(x.die, x.to)}, kept ${faceText(x.die, x.kept)}`)
+    detail += "\n" + r.rerolls
+      .map((x) => `${x.kind === "edge" ? "Edge" : "Trouble"}: ${rerollName(x.die)} ${faceText(x.die, x.from)} → ${faceText(x.die, x.to)}, kept ${faceText(x.die, x.kept)}`)
       .join("\n");
-    detail += "\n" + rr;
   }
   $("detail").textContent = detail;
 }
@@ -86,14 +115,14 @@ function renderLog(log) {
     ol.append(li);
     return;
   }
-  for (const roll of log) {
+  for (const entry of log) {
     const li = document.createElement("li");
     const who = document.createElement("strong");
-    who.textContent = roll.playerName + (roll.label ? ` · ${roll.label}` : "");
+    who.textContent = entry.playerName + (entry.label ? ` · ${entry.label}` : "");
     const what = document.createElement("span");
-    what.textContent = summary(roll.result);
+    what.textContent = summary(entry.result);
     li.append(who, what);
-    const r = roll.result;
+    const r = entry.result;
     if (r.ultimate || (r.fantastic && r.success !== false)) li.classList.add("fantastic");
     else if (r.botched) li.classList.add("botched");
     ol.append(li);
@@ -101,41 +130,68 @@ function renderLog(log) {
 }
 
 // ---- rolling ----
-async function doRoll() {
-  const num = (id) => (($(id).value ?? "") === "" ? null : Number($(id).value));
-  const result = rollD616({
-    ability: num("ability") ?? 0,
-    tn: num("tn"),
-    edges: Math.max(0, num("edges") ?? 0),
-    troubles: Math.max(0, num("troubles") ?? 0),
-  });
-  const roll = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    playerId: me.id,
-    playerName: me.name,
-    label: $("label").value.trim(),
-    result,
-  };
-  renderResult(roll, true);
+const num = (id) => ($(id).value === "" ? null : Number($(id).value));
 
-  const isPrivate = $("private").checked;
-  if (isPrivate) {
-    // Kept out of the shared log: shown only in this popover.
-    roll.playerName += " (private)";
-    renderLog([roll, ...loadLog()]);
+function begin(attack) {
+  cur = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    label: $("label").value.trim(),
+    private: $("private").checked,
+    roll: startRoll({
+      ability: num("ability") ?? 0,
+      tn: num("tn"),
+      edges: Math.max(0, num("edges") ?? 0),
+      troubles: Math.max(0, num("troubles") ?? 0),
+      attack,
+      multiplier: Math.max(0, num("mult") ?? 0),
+      reduction: Math.max(0, num("dr") ?? 0),
+      doubleFantastic: $("dbl").checked,
+    }),
+  };
+  renderRoll(true);
+  if (!cur.roll.pending) finalize();
+}
+
+// Called once every edge/trouble is spent (or declined). Shares the final roll.
+async function finalize() {
+  const entry = {
+    id: cur.id,
+    playerId: me.id,
+    playerName: me.name + (cur.private ? " (private)" : ""),
+    label: cur.label,
+    result: cur.roll,
+  };
+  if (cur.private) {
+    // Shown only here, never shared.
+    renderLog([entry, ...loadLog()]);
     return;
   }
-  const log = addToLog(roll);
-  renderLog(log);
+  renderLog(addToLog(entry));
   try {
-    // The background page on every client (including ours) picks this up.
-    await OBR.broadcast.sendMessage(CHANNEL, roll, { destination: "REMOTE" });
+    await OBR.broadcast.sendMessage(CHANNEL, entry, { destination: "REMOTE" });
   } catch (err) {
     console.error("Could not send roll to the table", err);
   }
 }
 
-$("roll").addEventListener("click", doRoll);
+$("roll").addEventListener("click", () => begin(false));
+$("attack").addEventListener("click", () => begin(true));
+
+$("dice").addEventListener("click", (e) => {
+  const die = e.target.closest("[data-die]");
+  if (!die || !cur || !cur.roll.pending) return;
+  cur.roll = rerollDie(cur.roll, die.dataset.die);
+  renderRoll(false);
+  if (!cur.roll.pending) finalize();
+});
+
+$("keep").addEventListener("click", () => {
+  if (!cur || !cur.roll.pending) return;
+  cur.roll = keepRoll(cur.roll);
+  renderRoll(false);
+  finalize();
+});
+
 $("clear").addEventListener("click", () => {
   clearLog();
   renderLog([]);

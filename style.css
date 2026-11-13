@@ -114,3 +114,24 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .log li.fantastic { border-left-color: var(--gold); }
 .log li.botched { border-left-color: #ff7b7b; }
 .log li.empty { color: var(--muted); border-left-color: transparent; }
+
+/* manual edge/trouble rerolls */
+button.die { border: 0; font-family: inherit; padding: 0; cursor: default; }
+button.die.pickable {
+  cursor: pointer;
+  outline: 2px dashed var(--gold);
+  outline-offset: 3px;
+}
+button.die.pickable:hover { transform: translateY(-3px); }
+button.die:disabled { color: var(--die-ink); }
+button.die.marvel:disabled { color: #fff; }
+button.die.marvel.fantastic:disabled { color: #3a1200; }
+.prompt { color: var(--gold); font-size: 12px; margin: 6px 0 2px; }
+.prompt .link { color: var(--text); margin-left: 6px; }
+.damage-out { color: var(--muted); font-weight: 700; margin-top: 4px; }
+.damage-out.hit { color: var(--text); font-size: 17px; }
+.damage { border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px 8px; display: grid; gap: 8px; margin: 0; }
+.damage legend { color: var(--muted); padding: 0 4px; font-size: 12px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.roll-btn.alt { background: var(--panel); border: 2px solid var(--red); }
+[hidden] { display: none !important; }
