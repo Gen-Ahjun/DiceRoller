@@ -24,6 +24,13 @@
     <div class="detail" id="detail"></div>
   </section>
 
+  <section class="actions">
+    <div class="btns">
+      <button type="button" id="roll" class="roll-btn alt">Roll d616</button>
+      <button type="button" id="attack" class="roll-btn">Attack + damage</button>
+    </div>
+  </section>
+
   <section class="controls">
     <div class="row">
       <label for="ability">Ability score</label>
@@ -34,22 +41,6 @@
       </div>
     </div>
 
-    <div class="row">
-      <label for="tn">Target number</label>
-      <div class="stepper">
-        <button type="button" data-step="tn" data-delta="-1" aria-label="Decrease target number">−</button>
-        <input id="tn" type="number" placeholder="none" inputmode="numeric">
-        <button type="button" data-step="tn" data-delta="1" aria-label="Increase target number">+</button>
-      </div>
-    </div>
-    <div class="presets" id="presets">
-      <button type="button" data-tn="4">Trivial 4</button>
-      <button type="button" data-tn="6">Easy 6</button>
-      <button type="button" data-tn="8">Routine 8</button>
-      <button type="button" data-tn="10">Challenging 10</button>
-      <button type="button" data-tn="12">Difficult 12</button>
-      <button type="button" data-tn="">No TN</button>
-    </div>
 
     <div class="row">
       <label for="edges">Edges</label>
@@ -95,10 +86,23 @@
     </div>
     <label class="check"><input type="checkbox" id="private"> Private roll (only I see it)</label>
 
-    <div class="btns">
-      <button type="button" id="roll" class="roll-btn alt">Roll d616</button>
-      <button type="button" id="attack" class="roll-btn">Attack + damage</button>
+    <div class="row">
+      <label for="tn">Target number</label>
+      <div class="stepper">
+        <button type="button" data-step="tn" data-delta="-1" aria-label="Decrease target number">−</button>
+        <input id="tn" type="number" placeholder="none" inputmode="numeric">
+        <button type="button" data-step="tn" data-delta="1" aria-label="Increase target number">+</button>
+      </div>
     </div>
+    <div class="presets" id="presets">
+      <button type="button" data-tn="4">Trivial 4</button>
+      <button type="button" data-tn="6">Easy 6</button>
+      <button type="button" data-tn="8">Routine 8</button>
+      <button type="button" data-tn="10">Challenging 10</button>
+      <button type="button" data-tn="12">Difficult 12</button>
+      <button type="button" data-tn="">No TN</button>
+    </div>
+
   </section>
 
   <section class="log">
