@@ -13,11 +13,13 @@ export function loadLog() {
   }
 }
 
-// Adds a roll to the stored log (deduplicated by id) and returns the new log.
+// Adds a roll to the stored log, or replaces it in place if it was already there
+// (a roll is re-sent after each edge/trouble). Returns the new log.
 export function addToLog(roll) {
   const log = loadLog();
-  if (log.some((r) => r.id === roll.id)) return log;
-  log.unshift(roll);
+  const i = log.findIndex((r) => r.id === roll.id);
+  if (i >= 0) log[i] = roll;
+  else log.unshift(roll);
   log.length = Math.min(log.length, MAX_LOG);
   try {
     localStorage.setItem(LOG_KEY, JSON.stringify(log));

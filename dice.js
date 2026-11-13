@@ -1,8 +1,7 @@
 // d616 logic for the Marvel Multiverse RPG. Pure functions, no Owlbear dependency.
 //
-// A roll is a plain object. startRoll() makes one, rerollDie() lets the player spend an
-// edge or trouble on a die of their choice, keepRoll() declines any unspent edges.
-// While roll.pending is set, the roll is not final yet.
+// A roll is a plain object. startRoll() makes one; rerollDie() spends an edge or trouble
+// on a die of the player's choice, any time after the roll.
 
 const rollD6 = (rng) => 1 + Math.floor(rng() * 6);
 
@@ -44,42 +43,34 @@ function evaluate(s) {
   return { botched, ultimate, fantastic, marvelValue, diceTotal, total, success, outcome, damage };
 }
 
-// Drops trouble that an Ultimate Fantastic roll ignores, clears spent pending state,
-// and refreshes every derived field.
 function settle(s) {
-  let next = { ...s };
-  next = { ...next, ...evaluate(next) };
-  if (next.pending && next.pending.kind === "trouble" && next.ultimate) {
-    next.pending = null;
-    next.ignoredTrouble = true;
-  }
-  if (next.pending && next.pending.count <= 0) next.pending = null;
-  return { ...next, ...evaluate(next) };
+  return { ...s, ...evaluate(s) };
 }
 
 export function startRoll({
-  ability = 0, edges = 0, troubles = 0, tn = null,
+  ability = 0, tn = null,
   attack = false, multiplier = 0, reduction = 0, doubleFantastic = true,
   rng = Math.random,
 } = {}) {
   const dice = { a: rollD6(rng), m: rollD6(rng), b: rollD6(rng) };
-  const net = edges - troubles; // edges and troubles cancel out
   return settle({
     dice,
     initial: { ...dice },
     rerolls: [],
-    ability, edges, troubles, net, tn,
+    ability, tn,
     attack, multiplier, reduction, doubleFantastic,
-    pending: net > 0 ? { kind: "edge", count: net } : net < 0 ? { kind: "trouble", count: -net } : null,
-    ignoredTrouble: false,
   });
 }
 
-// Spend one edge/trouble on the chosen die ("a", "m" or "b").
+// Whether trouble can still be applied (an Ultimate Fantastic roll ignores it).
+export function canTrouble(roll) {
+  return !roll.ultimate;
+}
+
+// Reroll one die ("a", "m" or "b") using an edge or trouble.
 // Edge keeps the better of the two numbers, trouble keeps the worse.
-export function rerollDie(roll, die, rng = Math.random) {
-  if (!roll.pending) return roll;
-  const kind = roll.pending.kind;
+export function rerollDie(roll, die, kind, rng = Math.random) {
+  if (kind === "trouble" && !canTrouble(roll)) return roll;
   const from = roll.dice[die];
   const to = rollD6(rng);
   const better = effective(die, to) > effective(die, from);
@@ -89,13 +80,7 @@ export function rerollDie(roll, die, rng = Math.random) {
     ...roll,
     dice: { ...roll.dice, [die]: kept },
     rerolls: [...roll.rerolls, { kind, die, from, to, kept }],
-    pending: { kind, count: roll.pending.count - 1 },
   });
-}
-
-// Decline any edges that are left.
-export function keepRoll(roll) {
-  return settle({ ...roll, pending: null });
 }
 
 // "6 M 5" style notation: the Marvel die is always the middle die.

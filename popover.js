@@ -1,5 +1,5 @@
 import { OBR, CHANNEL, addToLog, loadLog, clearLog } from "./shared.js";
-import { startRoll, rerollDie, keepRoll, notation, summary, damageText } from "./dice.js";
+import { startRoll, rerollDie, canTrouble, notation, summary, damageText } from "./dice.js";
 
 const $ = (id) => document.getElementById(id);
 const settingsKey = "mm-dice-settings";
@@ -48,16 +48,19 @@ const rerollName = (die) => (die === "m" ? "Marvel die" : "die");
 
 function renderRoll(animate) {
   const r = cur.roll;
-  const pending = r.pending;
   const dice = $("dice");
 
-  for (const el of dice.children) {
+  for (const el of dice.querySelectorAll(".die")) {
     const key = el.dataset.die;
     el.textContent = faceText(key, r.dice[key]);
     el.classList.toggle("fantastic", key === "m" && r.fantastic);
     el.classList.toggle("botched", r.botched);
-    el.classList.toggle("pickable", !!pending);
-    el.disabled = !pending;
+  }
+  // Edge and trouble buttons are live once there is a roll.
+  for (const btn of dice.querySelectorAll(".rr button")) {
+    const trouble = btn.dataset.kind === "trouble";
+    btn.disabled = trouble && !canTrouble(r);
+    btn.title = trouble && !canTrouble(r) ? "Ultimate Fantastic ignores trouble" : "";
   }
   if (animate) {
     dice.classList.remove("tumble");
@@ -65,22 +68,10 @@ function renderRoll(animate) {
     dice.classList.add("tumble");
   }
 
-  // Prompt for edges and troubles
-  const prompt = $("prompt");
-  prompt.hidden = !pending;
-  if (pending) {
-    const left = pending.count;
-    $("promptText").textContent =
-      pending.kind === "edge"
-        ? `Edge: click the die you want to reroll (${left} left). You keep the better number.`
-        : `Trouble: click the die to reroll (${left} left). You keep the worse number.`;
-    $("keep").hidden = pending.kind !== "edge";
-  }
-
   $("total").textContent = r.total;
   const out = $("outcome");
-  out.textContent = pending ? "…" : r.outcome;
-  out.className = "outcome " + (pending ? "" : r.ultimate ? "ultimate" : r.fantastic ? "fantastic" : r.botched ? "botched" : r.success === true ? "good" : r.success === false ? "bad" : "");
+  out.textContent = r.outcome;
+  out.className = "outcome " + (r.ultimate ? "ultimate" : r.fantastic ? "fantastic" : r.botched ? "botched" : r.success === true ? "good" : r.success === false ? "bad" : "");
 
   const dmg = $("damage");
   if (r.damage) {
@@ -93,10 +84,8 @@ function renderRoll(animate) {
 
   const bits = [`${notation(r)}${r.ability ? (r.ability > 0 ? ` + ${r.ability}` : ` − ${Math.abs(r.ability)}`) : ""}`];
   if (r.tn !== null) bits.push(`TN ${r.tn}`);
-  if (r.net > 0) bits.push(`${r.net} edge${r.net > 1 ? "s" : ""}`);
-  if (r.net < 0) bits.push(`${-r.net} trouble${r.net < -1 ? "s" : ""}`);
   let detail = bits.join("  ·  ");
-  if (r.ignoredTrouble) detail += "\nUltimate Fantastic: trouble ignored";
+  if (r.ultimate && r.rerolls.length) detail += "\nUltimate Fantastic: trouble is ignored";
   if (r.rerolls.length) {
     detail += "\n" + r.rerolls
       .map((x) => `${x.kind === "edge" ? "Edge" : "Trouble"}: ${rerollName(x.die)} ${faceText(x.die, x.from)} → ${faceText(x.die, x.to)}, kept ${faceText(x.die, x.kept)}`)
@@ -140,8 +129,6 @@ function begin(attack) {
     roll: startRoll({
       ability: num("ability") ?? 0,
       tn: num("tn"),
-      edges: Math.max(0, num("edges") ?? 0),
-      troubles: Math.max(0, num("troubles") ?? 0),
       attack,
       multiplier: Math.max(0, num("mult") ?? 0),
       reduction: Math.max(0, num("dr") ?? 0),
@@ -149,11 +136,12 @@ function begin(attack) {
     }),
   };
   renderRoll(true);
-  if (!cur.roll.pending) finalize();
+  share();
 }
 
-// Called once every edge/trouble is spent (or declined). Shares the final roll.
-async function finalize() {
+// Records the roll on screen and sends it to the table. Called after the first roll and
+// again after each edge or trouble, so everyone sees the current result.
+async function share() {
   const entry = {
     id: cur.id,
     playerId: me.id,
@@ -163,7 +151,7 @@ async function finalize() {
   };
   if (cur.private) {
     // Shown only here, never shared.
-    renderLog([entry, ...loadLog()]);
+    renderLog([entry, ...loadLog().filter((r) => r.id !== entry.id)]);
     return;
   }
   renderLog(addToLog(entry));
@@ -178,18 +166,11 @@ $("roll").addEventListener("click", () => begin(false));
 $("attack").addEventListener("click", () => begin(true));
 
 $("dice").addEventListener("click", (e) => {
-  const die = e.target.closest("[data-die]");
-  if (!die || !cur || !cur.roll.pending) return;
-  cur.roll = rerollDie(cur.roll, die.dataset.die);
+  const btn = e.target.closest(".rr button");
+  if (!btn || !cur || btn.disabled) return;
+  cur.roll = rerollDie(cur.roll, btn.dataset.die, btn.dataset.kind);
   renderRoll(false);
-  if (!cur.roll.pending) finalize();
-});
-
-$("keep").addEventListener("click", () => {
-  if (!cur || !cur.roll.pending) return;
-  cur.roll = keepRoll(cur.roll);
-  renderRoll(false);
-  finalize();
+  share();
 });
 
 $("clear").addEventListener("click", () => {

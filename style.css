@@ -135,3 +135,16 @@ button.die.marvel.fantastic:disabled { color: #3a1200; }
 .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .roll-btn.alt { background: var(--panel); border: 2px solid var(--red); }
 [hidden] { display: none !important; }
+
+/* per-die edge / trouble buttons */
+.die-col { display: grid; justify-items: center; gap: 6px; }
+.rr { display: grid; gap: 3px; width: 64px; }
+.rr button {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--edge); border-radius: 4px;
+  padding: 3px 0; font-size: 11px; cursor: pointer;
+}
+.rr button[data-kind="edge"]:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.rr button[data-kind="trouble"]:hover:not(:disabled) { border-color: #ff7b7b; color: #ff7b7b; }
+.rr button:disabled { opacity: .35; cursor: not-allowed; }
+.dice { gap: 10px; align-items: start; }

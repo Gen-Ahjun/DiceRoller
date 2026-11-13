@@ -10,13 +10,18 @@
 <main>
   <section class="stage" aria-live="polite">
     <div class="dice" id="dice">
-      <button type="button" class="die" data-die="a" disabled aria-label="Die 1">–</button>
-      <button type="button" class="die marvel" data-die="m" disabled aria-label="Marvel die">–</button>
-      <button type="button" class="die" data-die="b" disabled aria-label="Die 2">–</button>
-    </div>
-    <div class="prompt" id="prompt" hidden>
-      <span id="promptText"></span>
-      <button type="button" id="keep" class="link" hidden>Keep this roll</button>
+      <div class="die-col">
+        <button type="button" class="die" data-die="a" disabled aria-label="Die 1">–</button>
+        <div class="rr"><button type="button" data-kind="edge" data-die="a" disabled>Edge</button><button type="button" data-kind="trouble" data-die="a" disabled>Trouble</button></div>
+      </div>
+      <div class="die-col">
+        <button type="button" class="die marvel" data-die="m" disabled aria-label="Marvel die">–</button>
+        <div class="rr"><button type="button" data-kind="edge" data-die="m" disabled>Edge</button><button type="button" data-kind="trouble" data-die="m" disabled>Trouble</button></div>
+      </div>
+      <div class="die-col">
+        <button type="button" class="die" data-die="b" disabled aria-label="Die 2">–</button>
+        <div class="rr"><button type="button" data-kind="edge" data-die="b" disabled>Edge</button><button type="button" data-kind="trouble" data-die="b" disabled>Trouble</button></div>
+      </div>
     </div>
     <div class="total" id="total">Roll to begin</div>
     <div class="outcome" id="outcome"></div>
@@ -42,22 +47,6 @@
     </div>
 
 
-    <div class="row">
-      <label for="edges">Edges</label>
-      <div class="stepper">
-        <button type="button" data-step="edges" data-delta="-1" aria-label="Fewer edges">−</button>
-        <input id="edges" type="number" min="0" value="0" inputmode="numeric">
-        <button type="button" data-step="edges" data-delta="1" aria-label="More edges">+</button>
-      </div>
-    </div>
-    <div class="row">
-      <label for="troubles">Troubles</label>
-      <div class="stepper">
-        <button type="button" data-step="troubles" data-delta="-1" aria-label="Fewer troubles">−</button>
-        <input id="troubles" type="number" min="0" value="0" inputmode="numeric">
-        <button type="button" data-step="troubles" data-delta="1" aria-label="More troubles">+</button>
-      </div>
-    </div>
 
     <fieldset class="damage">
       <legend>Damage (attacks)</legend>

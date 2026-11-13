@@ -5,9 +5,7 @@
 - A 1 on the Marvel die shows as **M**, counts as 6 and makes the roll **Fantastic** (Fantastic success / Fantastic failure).
 - **6 M 6** is an **Ultimate Fantastic** roll (18): automatic success, and it ignores trouble.
 - **1 1 1** (Marvel die counted as 1) is a **botched roll** (total 3 + ability).
-- **Edge**: after the roll, click any die to reroll it and keep the better number. Repeat for stacked edges, or click "Keep this roll" to skip.
-- **Trouble**: click the die to reroll (the rules say your best die, or the one the Narrator picks) and keep the worse number. Trouble is ignored on an Ultimate Fantastic roll.
-- Edges and troubles cancel each other out. A roll is shared with the table once all edges/troubles are resolved.
+- **Edge / Trouble**: after rolling, press **Edge** or **Trouble** under any die to reroll it. Edge keeps the better number, Trouble keeps the worse. Press as many times as you have edges or troubles; no need to declare them before rolling. Trouble is disabled on an Ultimate Fantastic roll (it ignores trouble). The updated roll is re-sent to the table after each press.
 - **Damage** ("Attack + damage"): (Marvel die x damage multiplier) + ability score. Damage reduction lowers the multiplier, and a Fantastic success doubles the total (toggleable). A miss does no damage. Damage updates after any rerolls.
 
 ## Deploy

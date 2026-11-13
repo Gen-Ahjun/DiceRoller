@@ -17,6 +17,7 @@ OBR.onReady(() => {
       ? "SUCCESS"
       : roll.result.success === false ? "WARNING" : "DEFAULT";
     const label = roll.label ? ` (${roll.label})` : "";
-    OBR.notification.show(`${roll.playerName}${label}: ${summary(roll.result)}`, variant);
+    const again = roll.result.rerolls.length ? " [reroll]" : "";
+    OBR.notification.show(`${roll.playerName}${label}${again}: ${summary(roll.result)}`, variant);
   });
 });
