@@ -11,11 +11,11 @@
 
 ## Deploy
 Any static host works (Firebase Hosting, Netlify, Vercel, GitHub Pages, Cloudflare Pages). Upload the files in this folder as the site root, so that
-`https://YOUR-SITE/manifest.json` loads.
+`https://YOUR-SITE/manifest.json` (a subfolder like `https://USER.github.io/repo/manifest.json` works too) loads.
 
 Owlbear needs CORS enabled on `manifest.json`. Netlify/Vercel/GitHub Pages/Firebase send `Access-Control-Allow-Origin: *` for static files by default or with a one-line header rule. For Firebase add this to `firebase.json` under `hosting`:
 
     "headers": [{ "source": "/**", "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }] }]
 
 ## Install in Owlbear Rodeo
-Profile → Add Extension → paste `https://YOUR-SITE/manifest.json`. Then enable it in each room.
+Profile → Add Extension → paste `https://YOUR-SITE/manifest.json` (a subfolder like `https://USER.github.io/repo/manifest.json` works too). Then enable it in each room.
